@@ -14,9 +14,9 @@ def loop(players, index):
 
     if index < num_players:
         index += 1
-    # if index >= num_players:
-    #     index = 0
-    return loop(players, index)
+    if index >= num_players:
+        index = 0
+    return True
 
 def game(players):
     global num_players, pyzhee
@@ -25,8 +25,11 @@ def game(players):
     pyzhee.roll_all()
     print('Welcome to PyZhee!')
     index = 0
-    while loop(players, index):
-        pass
+    while True:
+        looping = loop(players, index)
+        index += 1
+        if not looping:
+            break
     print('Game over!')
 
 
