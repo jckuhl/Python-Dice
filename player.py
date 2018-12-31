@@ -1,14 +1,16 @@
-from dicecup import DiceCup
-
 class Player:
     
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.score = 0
         self.turn = False
-        self.dicecup = None
+        self.values = []
 
-    def new_dice(self, dice_str):
-        pass
+    def play_turn(self, dicecup):
+        if self.turn:
+            self.values = dicecup.roll_all()
+            return self.values
+        return None
 
-    def play_turn(self, ):
-        pass
+    def set_value(self, num, index):
+        self.values[index] = num

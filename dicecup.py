@@ -21,6 +21,7 @@ class DiceCup:
         dice = int(dice_type[0])
         sides = int(dice_type[1])
         self.dice = []
+        self.values = []
         while len(self.dice) < dice:
             self.dice.append(Dice(sides))
 

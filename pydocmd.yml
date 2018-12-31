@@ -1,0 +1,4 @@
+site_name: Welcome to pydoc-markdown
+generate:
+pages:
+- Home: index.md << ../README.md

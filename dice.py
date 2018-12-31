@@ -112,7 +112,7 @@ class Dice:
         subtracts two dice
         """
         if isinstance(other, Dice):
-            return other.value - self.value 
+            return self.value - other.value 
         elif isinstance(other, int):
             return self.value - other
         else:

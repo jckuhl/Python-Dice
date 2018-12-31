@@ -1,6 +1,6 @@
 from dicecup import DiceCup
 
-class Yahtzee(DiceCup):
+class PyZhee(DiceCup):
 
     def __init__(self):
         super().__init__('5d6')
