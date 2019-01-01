@@ -40,6 +40,17 @@ class Dice:
             return self.value == other
         else:
             raise dice_error["type_error"]
+
+    def __ne__(self, other):
+        """
+        Checks equality by comparing value
+        """
+        if isinstance(other, Dice):
+            return self.value != other.value
+        elif isinstance(other, int):
+            return self.value != other
+        else:
+            raise dice_error["type_error"]
     
     def __ge__(self, other):
         """
