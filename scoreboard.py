@@ -1,3 +1,4 @@
+from dieexception import DieException
 
 class ScoreBoard:
 
@@ -36,7 +37,7 @@ class ScoreBoard:
         subtotal = 0
         for key in self.__score[section].keys():
             value = self.__score[section][key]
-            if value is not None:
+            if value is not -1:
                 subtotal += self.__score[section][key]
             else:
                 subtotal += 0
@@ -48,9 +49,9 @@ class ScoreBoard:
         Example: self.__field_is_blank('lower', 'ones') will check for none on self.__score['lower']['ones']
         """
         if len(args) == 2:
-            return self.__score[args[0]][args[1]] != None
+            return self.__score[args[0]][args[1]] == None
         elif len(args) == 1:
-            return self.__score[args[0]] != None
+            return self.__score[args[0]] == None
         else:
             raise Exception('invalid number of arguments')
 
@@ -83,24 +84,33 @@ class ScoreBoard:
         """
         Sets a field's score if it isn't blank
         """
-        if not self.__field_is_blank(key):
-            raise Exception('That field is not blank!')
-        else:
-            self.__score[key] = value
+        if key in self.__score['upper'].keys():
+            if not self.__field_is_blank('upper', key):
+                raise DieException('That field is not blank!')
+            else:
+                self.__score['upper'][key] = value
+        elif key in self.__score['lower'].keys():
+            if not self.__field_is_blank('lower', key):
+                raise DieException('That field is not blank!')
+            else:
+                self.__score['lower'][key] = value
 
     def view_scores(self):
         """
         Prints out the scores
         """
         scores = { 
-            **self.__score['upper'], 
-            **self.__score['total upper'], 
-            **self.__score['lower'], 
-            **self.__score['total lower'], 
-            **self.__score['grand total'] 
+            **self.__score['upper'],
+            'total upper': self.__score['total upper'],
+            **self.__score['lower'],
+            'total lower': self.__score['total lower'],
+            'grand total': self.__score['grand total'] 
         }
         for score in scores:
-            s = self.__score[score]
+            s = scores[score]
             if s == None:
                 s = 0
-            print(f'{score.capitalize()}: {s}')
+            print(f'\t{score.capitalize()}: {s}')
+    
+    def get_keys(self):
+        return list(self.__score.keys()) + list(self.__score['upper'].keys()) + list(self.__score['lower'].keys())

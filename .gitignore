@@ -8,6 +8,7 @@ __pycache__/
 *$py.class
 
 test.py
+DONOTCOUNT.txt
 
 # C extensions
 *.so
