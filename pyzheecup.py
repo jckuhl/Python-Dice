@@ -79,3 +79,14 @@ class PyZhee(DiceCup):
         returns true if small straight
         """
         return self.straight() == 4
+
+    def count_numbers(self, number):
+        """
+        Counts the number of numbers in the dice
+        """
+        number = str(number)
+        count = self.count()
+        if number in count.keys():
+            return count[number]
+        else:
+            return 0

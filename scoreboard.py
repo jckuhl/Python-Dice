@@ -2,129 +2,105 @@
 class ScoreBoard:
 
     def __init__(self):
-        self.score = {
-            "ones": None,
-            "twos": None,
-            "threes": None,
-            "fours": None,
-            "fives": None,
-            "sixes": None,
-            "totalupper": None,
-            "threeofakind": None,
-            "fourofakind": None,
-            "fullhouse": None,
-            "smstraight": None,
-            "lgstraight": None,
-            "yahtzee": None,
-            "yahtzeebonus": None,
-            "totallower": None,
-            "grandtotal": None
+        """
+        Initializes a scoreboard with a set up for the score dictionary
+        """
+        self.__score = {
+            "upper": {
+                "ones": None,
+                "twos": None,
+                "threes": None,
+                "fours": None,
+                "fives": None,
+                "sixes": None,
+            },
+            "total upper": None,
+            "lower": {
+                "three of a kind": None,
+                "four of a kind": None,
+                "full house": None,
+                "small straight": None,
+                "large straight": None,
+                "yahtzee": None,
+                "chance": None,
+                "yahtzeebonus": None,
+            },
+            "total lower": None,
+            "grand total": None
         }
-    
-    def find_kinds(self, num, count):
-        """
-        Finds X of a Kind and puts them in a list of tuples (value, number_of_value)
-        Count is a dictionary coming from a DiceCup object that has a count of all the values
-        """
-        results = []
-        for key in count:
-            if count[key] >= num:
-                results.append((key, count[key]))
-        return results
 
-    def of_a_kind(self, num, count):
+    def __add_section(self, section):
         """
-        Checks if a kind is present or not, of a specific number, returns true if the kind is present
+        Sums all the values in a section (lower or upper) of the score dictionary
         """
-        if len(self.find_kinds(num, count)) != 0:
-            return True
-        return False
-
-    def one_pair(self, count):
-        """
-        Returns true if a single pair is present
-        """
-        return len(self.find_kinds(2, count)) >= 1
-
-    def two_pair(self, count):
-        """
-        Returns true if a two pair or a 4 of a kind is present
-        """
-        return len(self.find_kinds(2, count)) >= 2 or len(self.find_kinds(4, count)) >= 1
-
-    def get_highest_die(self, count):
-        """
-        Returns the highest value die
-        """
-        keys = list(map(lambda key: int(key), count.keys))
-        return keys.sort()[0]
-
-    def full_house(self, count):
-        """
-        Returns true if a full house is present
-        """
-        three_of_kind = self.find_kinds(3, count)
-        two_of_kind = self.find_kinds(2, count)
-        if len(three_of_kind) != 0 and len(two_of_kind) != 0:
-            for three in three_of_kind:
-                for two in two_of_kind:
-                    if three[0] != two[0]:
-                        return True
-        return False
-
-    def straight(self, dicecup):
-        """
-        Finds the length of a straight
-        """
-        dicecup.sort()
-        i = 0; j = 1; count = 0
-        while j < len(dicecup.dice):
-            if abs(dicecup.dice[i] - dicecup.dice[j]) == 1:
-                count += 1
-            i += 1
-            j += 1
-        return count
-
-    def sm_straight(self, dicecup):
-        """
-        returns true if small straight
-        """
-        return self.straight(dicecup) >= 3
-
-    def lg_straight(self, dicecup):
-        """
-        returns true if small straight
-        """
-        return self.straight(dicecup) == 4
-
-    def count_numbers(self, number, count):
-        """
-        Counts the number of numbers in the dice
-        """
-        number = str(number)
-        if number in count.keys:
-            return count[number]
-        else:
-            return 0
-
-    def total_lower(self):
-        keys = ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes']
         subtotal = 0
-        for key in keys:
-            subtotal += self.score[key]
+        for key in self.__score[section].keys():
+            value = self.__score[section][key]
+            if value is not None:
+                subtotal += self.__score[section][key]
+            else:
+                subtotal += 0
+        return subtotal
+
+    def __field_is_blank(self, *args):
+        """
+        Checks if a given field is blank.  *args are keys given in order
+        Example: self.__field_is_blank('lower', 'ones') will check for none on self.__score['lower']['ones']
+        """
+        if len(args) == 2:
+            return self.__score[args[0]][args[1]] != None
+        elif len(args) == 1:
+            return self.__score[args[0]] != None
+        else:
+            raise Exception('invalid number of arguments')
+
+    def total_upper(self):
+        """
+        Sums the upper section, adding 35 as a bonus if the score is greater than 63
+        """
+        subtotal = self.__add_section('upper')
         if subtotal >= 63:
             subtotal += 35
         return subtotal
 
 
-    def total_upper(self):
-        keys = ['threeofakind', 'fourofakind', 'fullhouse', 'smstraight', 'lgstraight', 'yahtzee']
-        subtotal = 0
-        for key in keys:
-            subtotal += self.score[key]
-        if self.score['yahtzeebonus'] is not None:
-            subtotal += 100 * self.score['yahtzeebonus']
+    def total_lower(self):
+        """
+        Sums the lower section, adding 100 * the number of yahtzee bonuses, if there are any
+        """
+        subtotal = self.__add_section('lower')
+        if not self.__field_is_blank('lower', 'yahtzee bonus'):
+            subtotal += 100 * self.__score['lower']['yahtzee bonus']
         return subtotal
 
     def grandtotal(self):
-        return self.score['totalupper'] + self.score['totallower']
+        """
+        Sums the top and bottom
+        """
+        return self.__score['total upper'] + self.__score['total lower']
+
+    def set_score(self, key, value):
+        """
+        Sets a field's score if it isn't blank
+        """
+        if not self.__field_is_blank(key):
+            raise Exception('That field is not blank!')
+        else:
+            self.__score[key] = value
+
+    def view_scores(self):
+        """
+        Prints out the scores
+        """
+        scores = { 
+            **self.__score['upper'], 
+            **self.__score['total upper'], 
+            **self.__score['lower'], 
+            **self.__score['total lower'], 
+            **self.__score['grand total'] 
+        }
+        for score in scores:
+            s = self.__score[score]
+            if s == None:
+                s = 0
+            print(f'{score.capitalize()}: {s}')

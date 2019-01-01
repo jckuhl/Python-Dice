@@ -5,6 +5,11 @@ from pyzheecup import PyZhee
 from dicecup import DiceCup
 from dice import Dice
 
+def apply_score(player, rolls):
+    print(f'Here is {player.name}\'s current scores: ')
+    player.score_board.view_scores()
+    pass
+
 def create_roll_string(rolls):
     string = ''
     index = 1
@@ -51,7 +56,7 @@ def loop(players, index):
             remaining_rolls = 0
         else:
             print('Please only enter Y (yes) or N (no) as a response')
-
+    apply_score(player, rolls)
     if index < num_players:
         index += 1
     if index >= num_players:
