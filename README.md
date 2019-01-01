@@ -2,6 +2,18 @@
 
 A Framework for making dice game.  Primary modules are `dice.py` and `dicecup.py`.
 
+A Yahtzee clone can be played from `pyzhee.py` and uses `scoreboard.py` and `pyzheecup.py`.
+
+Play `pyzhee` by entering the following commands:
+
+```
+python3 pyzhee.py player1 player2 player3
+```
+- This will set up a game between three players.  Each argument is a player's name
+- You may have as many players as you wish
+- python3 can be replaced by whatever your path to Python 3 is in your system
+- Providing zero arguments will have you play against a computer opponent
+
 ## dice.py
 
 ### `class Dice`
