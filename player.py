@@ -1,3 +1,5 @@
+from scoreboard import ScoreBoard
+
 class Player:
     
     def __init__(self, name):
@@ -5,6 +7,7 @@ class Player:
         self.score = 0
         self.turn = False
         self.values = []
+        self.score_board = ScoreBoard()
 
     def play_turn(self, dicecup):
         if self.turn:

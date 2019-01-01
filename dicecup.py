@@ -45,7 +45,15 @@ class DiceCup:
         self.values[index] = self.dice[index].roll()
         return self.values
 
-    def roll_set(self, number):
+    def roll_set(self, indices):
+        """
+        Rolls at a given list of indices
+        """
+        for index in indices:
+            self.values[index] = self.dice[index].roll()
+        return self.values
+
+    def roll_specific(self, number):
         """
         Rolls all the die with a specific value
         """
