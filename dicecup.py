@@ -1,4 +1,5 @@
 from dice import Dice
+from dieexception import DieException
 
 dicecup_errors = {
     "invalid_string": Exception('Invalid dice type string, should be in format XdY'),
@@ -42,6 +43,8 @@ class DiceCup:
         """
         if len(self.dice) == 0:
             raise dicecup_errors["no_dice"]
+        if index >= len(self.dice) or index < 0:
+            raise DieException()
         self.values[index] = self.dice[index].roll()
         return self.values
 
@@ -49,6 +52,9 @@ class DiceCup:
         """
         Rolls at a given list of indices
         """
+        for index in indices:
+            if index >= len(self.dice) or index < 0:
+                raise DieException()
         for index in indices:
             self.values[index] = self.dice[index].roll()
         return self.values

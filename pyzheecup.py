@@ -28,7 +28,7 @@ class PyZhee(DiceCup):
         """
         Returns true if a single pair is present
         """
-        return len(self.find_kinds(2)) >= 1
+        return len(self.find_kinds(2)) >= 1 or len(self.find_kinds(4)) >= 1
 
     def two_pair(self):
         """

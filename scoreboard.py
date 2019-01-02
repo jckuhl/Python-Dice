@@ -33,11 +33,12 @@ class ScoreBoard:
     def __add_section(self, section):
         """
         Sums all the values in a section (lower or upper) of the score dictionary
+        None values are treated as zero
         """
         subtotal = 0
         for key in self.__score[section].keys():
             value = self.__score[section][key]
-            if value is not -1:
+            if value is not None:
                 subtotal += self.__score[section][key]
             else:
                 subtotal += 0
@@ -94,6 +95,7 @@ class ScoreBoard:
                 raise DieException('That field is not blank!')
             else:
                 self.__score['lower'][key] = value
+        return value
 
     def view_scores(self):
         """
@@ -110,7 +112,10 @@ class ScoreBoard:
             s = scores[score]
             if s == None:
                 s = 0
-            print(f'\t{score.capitalize()}: {s}')
+            print(f'\t{score.title()}: {s}')
     
     def get_keys(self):
         return list(self.__score.keys()) + list(self.__score['upper'].keys()) + list(self.__score['lower'].keys())
+
+    def get_grand_total(self):
+        return self.__score['grand_total']
