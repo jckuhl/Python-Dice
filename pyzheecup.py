@@ -24,24 +24,6 @@ class PyZhee(DiceCup):
             return True
         return False
 
-    def one_pair(self):
-        """
-        Returns true if a single pair is present
-        """
-        return len(self.find_kinds(2)) >= 1 or len(self.find_kinds(4)) >= 1
-
-    def two_pair(self):
-        """
-        Returns true if a two pair or a 4 of a kind is present
-        """
-        return len(self.find_kinds(2)) >= 2 or len(self.find_kinds(4)) >= 1
-
-    def get_highest_die(self):
-        """
-        Returns the highest value die
-        """
-        return self.sort()[0]
-
     def full_house(self):
         """
         Returns true if a full house is present
@@ -80,13 +62,22 @@ class PyZhee(DiceCup):
         """
         return self.straight() == 4
 
-    def count_numbers(self, number):
+    def odd_man_out(self):
         """
-        Counts the number of numbers in the dice
+        Return the one die that doesn't fit a small straight
         """
-        number = str(number)
-        count = self.count()
-        if number in count.keys():
-            return count[number]
+        if self.lg_straight or not self.sm_straight:
+            # if there isn't a straight, or if there's a large straight, there's no odd man
+            return None
         else:
-            return 0
+            # if the value is in the middle, it has to be a duplicate
+            if self.of_a_kind(2):
+                return self.find_kinds(2)[0]
+            # if the value isn't a duplicate, it's either the first or last value
+            else:
+                dice = self.dice.copy()
+                dice.sort()
+                if abs(dice[0] - dice[1]) != 1:
+                    return dice[0]
+                else:
+                    return dice[4]

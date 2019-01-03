@@ -113,6 +113,9 @@ def score_full_house(player):
         score = player.score_board.set_score('full house', 0)
 
 def calc_score(player, response):
+    """
+    Determines the appropriate function to run given the player's response
+    """
     if response == 'yatzhee bonus':
         print('You may only use that field if you\'ve already got a yatzhee and only for further yatzhees')
         return False
@@ -185,7 +188,12 @@ def roll_die(roll_fn, player_name):
     return rolls
 
 def ai_loop(player):
+    """
+    Decision tree and loop for the ai
+    I use the word "tree" here very liberally
+    """
     def field_is_blank(field):
+        """ Determine if a field is blank or not """
         return player.score_board.get_field(field) is None
     upper = {
         '1': 'ones',
@@ -198,13 +206,12 @@ def ai_loop(player):
     print(f'It is {player.name}\'s turn!')
     rolls = roll_die(pyzhee.roll_all, player.name)
     remaining_rolls = 2
-    while remaining_rolls > 0:
+    while True:
         print(f'{player.name} has {remaining_rolls} rolls remaining.')
         if pyzhee.of_a_kind(5) and field_is_blank('yatzhee'):
             score = player.score_board.set_score('yatzhee', 50)
             print('PYZHEE!')
             print(score_string(player, score, 'yatzhee'))
-            remaining_rolls = 0
             break
         elif pyzhee.of_a_kind(5) and not field_is_blank('yatzhee'):
             yatzhee_bonus = player.score_board.get_field('yatzhee bonus')
@@ -217,7 +224,6 @@ def ai_loop(player):
         elif pyzhee.of_a_kind(4) and field_is_blank('four of a kind'):
             score = player.score_board.set_score('four of a kind', pyzhee.sum())
             print(score_string(player, score, 'four of a kind'))
-            remaining_rolls = 0
             break
         elif pyzhee.full_house() and field_is_blank('full house'):
             # sometimes 3 of a kind is worth more than FH
@@ -227,23 +233,25 @@ def ai_loop(player):
             else:
                 score = player.score_board.set_score('full house', 25)
                 print(score_string(player, score, 'full house'))
-            remaining_rolls = 0
             break
         elif pyzhee.of_a_kind(3) and field_is_blank('three of a kind'):
             score = player.score_board.set_score('three of a kind', pyzhee.sum())
             print(score_string(player, score, 'three of a kind'))
-            remaining_rolls = 0
             break
         elif pyzhee.lg_straight() and field_is_blank('large straight'):
             score = player.score_board.set_score('large straight', 40)
             print(score_string(player, score, 'large straight'))
-            remaining_rolls = 0
             break
         elif pyzhee.sm_straight() and field_is_blank('small straight'):
-            score = player.score_board.set_score('small straight', 30)
-            print(score_string(player, score, 'small straight'))
-            remaining_rolls = 0
-            break
+            if remaining_rolls == 0 or not field_is_blank('chance'):
+                score = player.score_board.set_score('small straight', 30)
+                print(score_string(player, score, 'small straight'))
+                break
+            else:
+                odd_man = pyzhee.odd_man_out()
+                index = pyzhee.get_die_index(odd_man)
+                rolls = pyzhee.roll_single(index)
+                remaining_rolls -= 1
         else:
             print(f'{player.name} is rerolling!')
             # TODO AI REROLL DECISIONS

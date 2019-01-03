@@ -94,6 +94,17 @@ class DiceCup:
                 counter[key] += 1
         return counter
 
+    def count_numbers(self, number):
+        """
+        Counts how many times the number passed in appears
+        """
+        number = str(number)
+        count = self.count()
+        if number in count.keys():
+            return count[number]
+        else:
+            return 0
+
     def sort(self, reverse=True):
         """
         sorts the dice, ascending if bool reverse is True
@@ -104,7 +115,7 @@ class DiceCup:
     def get_die_index(self, value):
         try:
             return self.dice.index(value)
-        except ValueError
+        except ValueError:
             return -1
 
     def get_die_indices(self, values):
