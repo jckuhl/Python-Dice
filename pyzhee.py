@@ -2,11 +2,27 @@ from sys import argv
 from player import Player
 from pyzheegame import game
 from pyzheegameai import gameai
+from random import choice
+
+ai_players = [
+    'Guido Van Rossum',
+    'Alan Turing',
+    'Dennis Ritchie',
+    'Larry Wall',
+    'Yukihiro Matsumoto',
+    'Bjarne Stroustrup',
+    'Linus Torvalds',
+    'Ken Thompson',
+    'Grace Hopper',
+    'Ada Lovelace',
+    'Margaret Hamilton',
+    'John Von Neumann'
+]
 
 if __name__ == "__main__":
     names = argv[1:]
+    players = []
     if len(names) > 1:
-        players = []
         for name in names:
             players.append(Player(name.capitalize()))
         game(players)
@@ -15,6 +31,6 @@ if __name__ == "__main__":
             player = Player('Player 1')
         else:
             player = Player(argv[1].capitalize())
-        gameai(player)
-        print(f'{player.name} playing against the AI!')
+        players.extend([player, Player(choice(ai_players))])
+        gameai(players)
         

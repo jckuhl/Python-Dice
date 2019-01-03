@@ -219,9 +219,19 @@ def loop_multi_player(players, index, dicecup):
             print('Please only enter Y (yes) or N (no) as a response')
     apply_score(player, rolls)
 
-def loop_ai(player, dicecup):
+def loop_ai(players, turns, dicecup):
     """
     Primary gameplay loop against AI
     """
-    global pyzhee 
+    global pyzhee
     pyzhee = dicecup
+    if turns % 2 == 0:
+        player = players[0]
+        print(f'It is {player.name}\'s turn!')
+        #TODO player's turn
+    else:
+        player = players[1]
+        print(f'It is {player.name}\'s turn!')
+        pass
+        #TODO computer's turn
+    
