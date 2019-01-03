@@ -49,6 +49,8 @@ If you want to reroll the third, fourth and fifth die, just enter `345`
 
 When you either run out of rolls in your turn or get a combination that you like, you can enter your score into the desired field.  Simply type the field exactly as you see it in the display when you're prompted.
 
+> All inputs are case insensitive
+
 Once you've entered a value into a field on the scoreboard, you cannot enter a new value.  You **must** enter a score into a field, even if your only choice is to enter a score into a field where it counts for nothing.
 
 The only exception to this clause is the Yatzhee Bonus which can be reused every time you get a Yatzhee (five in a row) after your first Yatzhee.
@@ -63,7 +65,7 @@ The only exception to this clause is the Yatzhee Bonus which can be reused every
 | Fours  | All the fours| Add all the fours in your hand|
 | Fives  | All the fives| Add all the fives in your hand|
 | Sixes  | All the sixes| Add all the sixes in your hand|
-| Bonus  | Applied if the above are worth 63 or more | 35 points|
+| Bonus*  | Applied if the above are worth 63 or more | 35 points|
 | 3 of a Kind | 3 or more of any value | Sum of all the dice |
 | 4 of a Kind | 4 or more of any value | Sum of all the dice |
 | Full House | A pair and a 3 of a kind | 25 points |
@@ -71,3 +73,5 @@ The only exception to this clause is the Yatzhee Bonus which can be reused every
 | Large Straight | Five in a row | 40 points |
 | Yatzhee | Five of a kind | 50 points |
 | Yatzhee Bonus | Applied for every Yatzhee after the first | 100 points per bonus |
+
+> *The bonus is calculated automatically
