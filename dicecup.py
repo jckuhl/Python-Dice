@@ -100,3 +100,17 @@ class DiceCup:
         """
         self.dice.sort(reverse=reverse)
         return self.dice
+
+    def get_die_index(self, value):
+        try:
+            return self.dice.index(value)
+        except ValueError
+            return -1
+
+    def get_die_indices(self, values):
+        indices = []
+        for value in values:
+            i = self.get_die_index(value)
+            if i != -1:
+                indices.append(i)
+        return indices

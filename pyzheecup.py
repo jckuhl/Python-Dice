@@ -76,7 +76,7 @@ class PyZhee(DiceCup):
 
     def lg_straight(self):
         """
-        returns true if small straight
+        returns true if large straight
         """
         return self.straight() == 4
 

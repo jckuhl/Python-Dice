@@ -159,6 +159,9 @@ def apply_score(player, rolls):
         else:
             print('Please enter the desired field as it is displayed')
 
+def apply_score_ai(player, rolls):
+    return NotImplementedError
+
 def create_roll_string(rolls):
     """
     Creates a string with the current roll so the player knows which index each die belongs to
@@ -181,13 +184,78 @@ def roll_die(roll_fn, player_name):
     print(f'{player_name} rolls: {rolls}')
     return rolls
 
-def loop_multi_player(players, index, dicecup):
-    """
-    Primary gameplay loop, goes for 13 rounds per player
-    """
-    player = players[index]
-    global pyzhee
-    pyzhee = dicecup
+def ai_loop(player):
+    def field_is_blank(field):
+        return player.score_board.get_field(field) is None
+    upper = {
+        '1': 'ones',
+        '2': 'twos',
+        '3': 'threes',
+        '4': 'fours',
+        '5': 'fives',
+        '6': 'sixes'
+    }
+    print(f'It is {player.name}\'s turn!')
+    rolls = roll_die(pyzhee.roll_all, player.name)
+    remaining_rolls = 2
+    while remaining_rolls > 0:
+        print(f'{player.name} has {remaining_rolls} rolls remaining.')
+        if pyzhee.of_a_kind(5) and field_is_blank('yatzhee'):
+            score = player.score_board.set_score('yatzhee', 50)
+            print('PYZHEE!')
+            print(score_string(player, score, 'yatzhee'))
+            remaining_rolls = 0
+            break
+        elif pyzhee.of_a_kind(5) and not field_is_blank('yatzhee'):
+            yatzhee_bonus = player.score_board.get_field('yatzhee bonus')
+            if yatzhee_bonus == None:
+                score = player.score_board.set_score('yatzhee bonus', 100)
+                print(score_string(player, score, 'yatzhee bonus'))
+            else:
+                score =player.score_board.set_score('yatzhee bonus', yatzhee_bonus + 100)
+                print(score_string(player, score, 'yatzhee bonus'))
+        elif pyzhee.of_a_kind(4) and field_is_blank('four of a kind'):
+            score = player.score_board.set_score('four of a kind', pyzhee.sum())
+            print(score_string(player, score, 'four of a kind'))
+            remaining_rolls = 0
+            break
+        elif pyzhee.full_house() and field_is_blank('full house'):
+            # sometimes 3 of a kind is worth more than FH
+            if pyzhee.sum > 25 and field_is_blank('three of a kind'):
+                score = player.score_board.set_score('three of a kind', pyzhee.sum())
+                print(score_string(player, score, 'three of a kind'))
+            else:
+                score = player.score_board.set_score('full house', 25)
+                print(score_string(player, score, 'full house'))
+            remaining_rolls = 0
+            break
+        elif pyzhee.of_a_kind(3) and field_is_blank('three of a kind'):
+            score = player.score_board.set_score('three of a kind', pyzhee.sum())
+            print(score_string(player, score, 'three of a kind'))
+            remaining_rolls = 0
+            break
+        elif pyzhee.lg_straight() and field_is_blank('large straight'):
+            score = player.score_board.set_score('large straight', 40)
+            print(score_string(player, score, 'large straight'))
+            remaining_rolls = 0
+            break
+        elif pyzhee.sm_straight() and field_is_blank('small straight'):
+            score = player.score_board.set_score('small straight', 30)
+            print(score_string(player, score, 'small straight'))
+            remaining_rolls = 0
+            break
+        else:
+            print(f'{player.name} is rerolling!')
+            # TODO AI REROLL DECISIONS
+            rolls = pyzhee.roll_all()
+            print('Here are the current values:')
+            print(create_roll_string(rolls))
+            remaining_rolls -= 1
+    player.score_board.calculate_totals()
+    player.score_board.view_scores()
+
+
+def player_loop(player):
     print(f'It is {player.name}\'s turn!')
     rolls = roll_die(pyzhee.roll_all, player.name)
     remaining_rolls = 2
@@ -219,6 +287,15 @@ def loop_multi_player(players, index, dicecup):
             print('Please only enter Y (yes) or N (no) as a response')
     apply_score(player, rolls)
 
+def loop_multi_player(players, index, dicecup):
+    """
+    Primary gameplay loop, goes for 13 rounds per player
+    """
+    global pyzhee
+    pyzhee = dicecup
+    player = players[index]
+    player_loop(player)
+
 def loop_ai(players, turns, dicecup):
     """
     Primary gameplay loop against AI
@@ -227,11 +304,8 @@ def loop_ai(players, turns, dicecup):
     pyzhee = dicecup
     if turns % 2 == 0:
         player = players[0]
-        print(f'It is {player.name}\'s turn!')
-        #TODO player's turn
+        player_loop(player)
     else:
         player = players[1]
-        print(f'It is {player.name}\'s turn!')
-        pass
-        #TODO computer's turn
+        ai_loop(player)
     
