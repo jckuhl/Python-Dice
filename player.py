@@ -17,3 +17,4 @@ class Player:
 
     def set_value(self, num, index):
         self.values[index] = num
+        

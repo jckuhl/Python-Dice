@@ -13,7 +13,8 @@ python3 pyzhee.py player1 player2 player3
     - `python3 pyzhee.py michael pam jim dwight`
 - You may have as many players as you wish
 - python3 can be replaced by whatever your path to Python 3 is in your system
-- Providing zero arguments will have you play against a computer opponent
+- Providing zero or one arguments will have you play against a computer opponent
+    - Without providing a name, you'll simply be refered to as 'Player 1'
 
 ## dice.py
 

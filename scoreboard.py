@@ -22,9 +22,9 @@ class ScoreBoard:
                 "full house": None,
                 "small straight": None,
                 "large straight": None,
-                "yahtzee": None,
+                "yatzhee": None,
                 "chance": None,
-                "yahtzeebonus": None,
+                "yatzhee bonus": None,
             },
             "total lower": None,
             "grand total": None
@@ -71,15 +71,18 @@ class ScoreBoard:
         Sums the lower section, adding 100 * the number of yahtzee bonuses, if there are any
         """
         subtotal = self.__add_section('lower')
-        if not self.__field_is_blank('lower', 'yahtzee bonus'):
+        if not self.__field_is_blank('lower', 'yatzhee bonus'):
             subtotal += 100 * self.__score['lower']['yahtzee bonus']
         return subtotal
 
-    def grandtotal(self):
+    def calculate_totals(self):
         """
-        Sums the top and bottom
+        Sums the upper and lower sections, the grand total, and sets them
         """
-        return self.__score['total upper'] + self.__score['total lower']
+        self.__score['total upper'] = self.total_upper()
+        self.__score['total lower'] = self.total_lower()
+        self.__score['grand total'] = self.__score['total upper'] + self.__score['total lower']
+        return self.__score['grand total']
 
     def set_score(self, key, value):
         """
@@ -111,11 +114,21 @@ class ScoreBoard:
         for score in scores:
             s = scores[score]
             if s == None:
-                s = 0
+                s = 'blank'
             print(f'\t{score.title()}: {s}')
     
     def get_keys(self):
         return list(self.__score.keys()) + list(self.__score['upper'].keys()) + list(self.__score['lower'].keys())
 
     def get_grand_total(self):
-        return self.__score['grand_total']
+        return self.__score['grand total']
+
+    def get_field(self, field):
+        if field in self.__score['upper']:
+            return self.__score['upper'][field]
+        elif field in self.__score['lower']:
+            return self.__score['lower'][field]
+        elif field in self.__score:
+            return self.__score[field]
+        else:
+            return False
