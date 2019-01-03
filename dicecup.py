@@ -113,12 +113,18 @@ class DiceCup:
         return self.dice
 
     def get_die_index(self, value):
+        """
+        Gets the index of a given value or a -1 if it isn't found
+        """
         try:
             return self.dice.index(value)
         except ValueError:
             return -1
 
     def get_die_indices(self, values):
+        """
+        Gets the indices of all values found from a list of values
+        """
         indices = []
         for value in values:
             i = self.get_die_index(value)

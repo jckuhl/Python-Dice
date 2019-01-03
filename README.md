@@ -16,6 +16,8 @@ python3 pyzhee.py player1 player2 player3
 - Providing zero or one arguments will have you play against a computer opponent
     - Without providing a name, you'll simply be refered to as 'Player 1'
 
+Please see [How to play](howtoplay.md) for more information
+
 ## dice.py
 
 ### `class Dice`

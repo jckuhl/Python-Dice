@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 from dieexception import DieException
 from operator import itemgetter
@@ -7,10 +8,19 @@ responses = {
     'yes': [
         'y',
         'yes',
+        'da'
     ],
     'no': [
         'n',
-        'no'
+        'no',
+        'nyet'
+    ],
+    'exit': [
+        'exit',
+        'quit',
+        'q',
+        'x',
+        'e'
     ]
 }
 
@@ -159,11 +169,10 @@ def apply_score(player, rolls):
             successful_score = calc_score(player, response)
             if successful_score:
                 break
+        elif response in responses['exit']:
+            sys.exit()
         else:
             print('Please enter the desired field as it is displayed')
-
-def apply_score_ai(player, rolls):
-    return NotImplementedError
 
 def create_roll_string(rolls):
     """
@@ -208,11 +217,14 @@ def ai_loop(player):
     remaining_rolls = 2
     while True:
         print(f'{player.name} has {remaining_rolls} rolls remaining.')
+        # Yatzhee
         if pyzhee.of_a_kind(5) and field_is_blank('yatzhee'):
             score = player.score_board.set_score('yatzhee', 50)
             print('PYZHEE!')
             print(score_string(player, score, 'yatzhee'))
             break
+
+        # Yatzhee Bonus
         elif pyzhee.of_a_kind(5) and not field_is_blank('yatzhee'):
             yatzhee_bonus = player.score_board.get_field('yatzhee bonus')
             if yatzhee_bonus == None:
@@ -221,10 +233,14 @@ def ai_loop(player):
             else:
                 score =player.score_board.set_score('yatzhee bonus', yatzhee_bonus + 100)
                 print(score_string(player, score, 'yatzhee bonus'))
+        
+        # Four of a Kind
         elif pyzhee.of_a_kind(4) and field_is_blank('four of a kind'):
             score = player.score_board.set_score('four of a kind', pyzhee.sum())
             print(score_string(player, score, 'four of a kind'))
             break
+
+        # Full House
         elif pyzhee.full_house() and field_is_blank('full house'):
             # sometimes 3 of a kind is worth more than FH
             if pyzhee.sum > 25 and field_is_blank('three of a kind'):
@@ -234,31 +250,50 @@ def ai_loop(player):
                 score = player.score_board.set_score('full house', 25)
                 print(score_string(player, score, 'full house'))
             break
+
+        # Three Of A Kind
         elif pyzhee.of_a_kind(3) and field_is_blank('three of a kind'):
             score = player.score_board.set_score('three of a kind', pyzhee.sum())
             print(score_string(player, score, 'three of a kind'))
             break
+
+        # Large Straight
         elif pyzhee.lg_straight() and field_is_blank('large straight'):
             score = player.score_board.set_score('large straight', 40)
             print(score_string(player, score, 'large straight'))
             break
+
+        # Small Straight
         elif pyzhee.sm_straight() and field_is_blank('small straight'):
-            if remaining_rolls == 0 or not field_is_blank('chance'):
-                score = player.score_board.set_score('small straight', 30)
-                print(score_string(player, score, 'small straight'))
+            if remaining_rolls == 0:
+                if pyzhee.sum() > 30 or not field_is_blank('chance'):
+                    score = player.score_board.set_score('chance', pyzhee.sum())
+                    print(score_string(player, score, 'chance'))
+                else:
+                    score = player.score_board.set_score('small straight', 30)
+                    print(score_string(player, score, 'small straight'))
                 break
             else:
                 odd_man = pyzhee.odd_man_out()
                 index = pyzhee.get_die_index(odd_man)
                 rolls = pyzhee.roll_single(index)
                 remaining_rolls -= 1
+        # Chance and the upper part of the scoreboard
         else:
-            print(f'{player.name} is rerolling!')
-            # TODO AI REROLL DECISIONS
-            rolls = pyzhee.roll_all()
-            print('Here are the current values:')
-            print(create_roll_string(rolls))
-            remaining_rolls -= 1
+            if remaining_rolls == 0:
+                if field_is_blank('chance'):
+                    chance = pyzhee.sum()
+                    upper_scores = [pyzhee.count_numbers(value) * value for value in upper.values()]
+                    use_chance = True
+                    for value in upper_scores:
+                        if chance < value:
+                            use_chance = False
+                    if use_chance:
+                        score = player.score_board.set_score('chance', chance)
+                    else:
+                        pass
+                break
+
     player.score_board.calculate_totals()
     player.score_board.view_scores()
 
@@ -270,13 +305,15 @@ def player_loop(player):
     while remaining_rolls > 0:
         print(f'{player.name} has {remaining_rolls} rolls remaining.')
         response = input('Would you like to roll again? [Y/N]')
+        response.lower()
         if response.lower() in responses['yes']:
             remaining_rolls -= 1
             print('Here are the current values:')
             print(create_roll_string(rolls))
             while True:
                 response = input('Enter the number for each dice you\'d like to reroll, or \'A\' to reroll all:\n')
-                if response.lower() == 'a':
+                response.lower()
+                if response == 'a':
                     rolls = roll_die(pyzhee.roll_all, player.name)
                     break
                 elif response.isdigit():
@@ -287,10 +324,14 @@ def player_loop(player):
                         break
                     except DieException:
                         print('Please chose a valid position between 1-5')
+                elif response in responses['exit']:
+                    sys.exit()
                 else:
                     print('Invalid response')
-        elif response.lower() in responses['no']:
+        elif response in responses['no']:
             remaining_rolls = 0
+        elif response in responses['exit']:
+            sys.exit()
         else:
             print('Please only enter Y (yes) or N (no) as a response')
     apply_score(player, rolls)
