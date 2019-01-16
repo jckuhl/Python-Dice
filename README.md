@@ -20,6 +20,8 @@ Please see [How to play](howtoplay.md) for more information
 
 ## dice.py
 
+> For brevity sake, I will be ignoring the `self` argument in all method calls as it is only relevant inside the class
+
 ### `class Dice`
 
 Models a single die.  A die may have an number of sides.  A two sided die would essentially be a coin.  Dice have the appropriate dunders to be added, subtracted and compared.  The initializer takes a single parameter, `sides`, the number of sides
@@ -42,42 +44,166 @@ Rolls the die, returning a value between one and the number of sides, including 
 Models a dice cup, like a Yahtzee cup.  Initializer takes a string in the format of XdY to generate dice, where X is the number of dice and Y is the number of sides on a dice.  For a Yahtzee game, for example, the string is `'5d6'`.  5 for five dice and 6 for six sides per die.
 
 ```python
-dc = DiceCup('5d6') # create a dice cup with 5 six sided die
+dicecup = DiceCup('5d6') # create a dice cup with 5 six sided die
 ```
 
 > Note that initializing the dice cup leaves all the dice unrolled with values of 0.
+
+#### `set_values(values)`
+
+Sets the values of the dice cup to the values given.  Must be a list equal to the number of die in the dice cup.
+
+> This method was designed primarily for unit testing, it doesn't actually roll any of the die
+
+```python
+>>> dicecup.set_values([1,1,1,1,1])
+[1, 1, 1, 1, 1]
+```
 
 #### `roll_all()`
 
 Rolls all the dice in the dice cup.  Returns `values` list
 
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+```
+
 #### `roll_single(index)`
 
 Rolls the die at a given index.  Returns `values` list
+
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+>>> dicecup.roll_single(0)
+[3, 4, 3, 2, 3]
+```
 
 #### `roll_specific(number)`
 
 Rolls all the dice within the cup that have the same value as the number passed in.  Returns `values` list
 
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+>>> dicecup.roll_specific(3)
+[1, 4, 6, 2, 5]
+```
+
 #### `roll_set(indices)`
 
-Rolls all the dice with the given indices in the list passed in.  Throws an exception if any of the indices are out of bounds
+Rolls all the dice with the given indices in the list passed in.  Throws an exception if any of the indices are out of bounds.
+
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+>>> dicecup.roll_set([0, 1, 2])
+[6, 2, 4, 2, 3]
+```
+
+#### `roll_values(values)`
+
+Rolls all the dice with the given list of values passed in.  Throws an exception if any of the indices are out of bounds.
+
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+>>> dicecup.roll_values([4, 3])
+[1, 2, 4, 2, 6]
+```
+
+#### `roll_except(number)`
+
+Rolls all the dices whose value does not match the given number
+
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+>>> dicecup.roll_except(3)
+[5, 6, 3, 3, 3]
+```
+
+#### `roll_except_all(numbers)`
+
+Rolls all the dice whose value is not in the given list of numbers
+
+```python
+>>> dicecup.roll_all()
+[1, 4, 3, 2, 3]
+>>> dicecup.roll_except_all([3, 4])
+[5, 4, 3, 6, 3]
+```
 
 #### `sum()`
 
 Returns the sum of all the die
 
+```python
+>>> dicecup.roll_all()
+[1, 1, 1, 2, 2]
+>>> dicecup.sum()
+7
+```
+
 #### `count()`
 
 Returns a dictionary where all the keys are the unique dice face (`dice.value`) and all the values are the number of occurances of each dice face.
 
-#### `count_number(number)`
+```python
+>>> dicecup.roll_all()
+[3, 2, 2, 3, 3]
+>>> dicecup.count()
+{'3': 3, '2': 2}
+```
+
+#### `count_numbers(number)`
 
 Counts the number of times `number` appears.  Basically a getter for `count()`
+
+```python
+>>> dicecup.roll_all()
+[4, 2, 2, 4, 4]
+>>> dicecup.count_numbers(4)
+3
+```
 
 #### `sort(reverse=True)`
 
 Sorts the dice in place, highest to lowest unless reverse is `False`, default is `True`
+
+```python
+>>> dicecup.roll_all()
+[4, 2, 2, 4, 4]
+>>> dicecup.sort()
+[4, 4, 4, 2, 2]
+>>> dicecup.sort(reverse=False)
+[2, 2, 4, 4, 4]
+```
+
+#### `get_die_index(value)`
+
+Gets the index of the first occurrence of a given value or `-1` if it isn't found
+
+```python
+>>> dicecup.roll_all()
+[4, 2, 2, 4, 4]
+>>> dicecup.get_die_index(2)
+1
+>>> dicecup.get_die_index(5)
+-1
+```
+
+#### `get_die_indices(values)`
+
+Returns a list of die indices for the list of values put in or an empty list if none are found
+
+```python
+>>> pyzhee.roll_all()
+[3, 5, 6, 5, 4]
+>>> pyzhee.get_die_indices([3,5,6])
+[0, 1, 2]
+```
 
 ## pyzheecup.py
 
@@ -92,11 +218,11 @@ Searches for `num` of a kind.  For example `pyzhee.find_kinds(3)` will find any 
 An example:
 
 ```python
-pyzhee = PyZhee()
-pyzhee.roll_all()
-# [4, 4, 3, 3, 1]
-pyzhee.find_kinds(2)
-# [(4, 2), (3, 2)]
+>>> pyzhee = PyZhee()
+>>> pyzhee.roll_all()
+[4, 4, 3, 3, 1]
+>>> pyzhee.find_kinds(2)
+[(4, 2), (3, 2)]
 ```
 
 #### `of_a_kind(num)`
@@ -104,31 +230,87 @@ pyzhee.find_kinds(2)
 Similar to find kinds, returns `True` or `False` if a kind of `num` length is found
 
 ```python
-pyzhee = PyZhee()
-pyzhee.roll_all()
-# [4, 4, 3, 3, 3]
-pyzhee.of_a_kind(3)
-# True
-pyzhee.of_a_kind(4)
-# False
+>>> pyzhee = PyZhee()
+>>> pyzhee.roll_all()
+[4, 4, 3, 3, 3]
+>>> pyzhee.of_a_kind(3)
+True
+>>> pyzhee.of_a_kind(4)
+False
 ```
 
 #### `full_house()`
 
 Returns `True` if a full house is present, `False` if not
 
+```python
+>>> pyzhee.roll_all()
+[3, 3, 3, 4, 4]
+>>> pyzhee.full_house()
+True
+```
+
 #### `straight()`
 
 Returns the length of a straight.  Because it finds a straight by detecting if the distance of two values in a sorted array is 1 (absolute value) or not, it will always be one less than the actual length.  A length of 3 means the straight has four digits
+
+```python
+>>> pyzhee.roll_all()
+[3, 2, 3, 4, 5]
+>>> pyzhee.straight()
+3
+>>> pyzhee.roll_all()
+[1, 2, 3, 4, 5]
+>>> pyzhee.sm_straight()
+4
+```
 
 #### `sm_straight()`
 
 Returns true if a straight with four dice (`straight()` returns `3` or higher) is present, false if not
 
+```python
+>>> pyzhee.roll_all()
+[3, 2, 3, 4, 5]
+>>> pyzhee.sm_straight()
+True
+>>> pyzhee.sm_straight()
+False
+```
+
 #### `lg_straight()`
 
 Returns true if a straight with five dice (`straight()` returns `4`) is present, false if not
 
+```python
+>>> pyzhee.roll_all()
+[1, 2, 3, 4, 5]
+>>> pyzhee.sm_straight()
+True
+>>> pyzhee.lg_straight()
+True
+```
+
 #### `odd_man_out()`
 
 Returns the value of the die that doesn't fit in with a straight, if there is a small straight.  `None` if there is no straight, or if there's a large straight.
+
+```python
+>>> pyzhee.roll_all()
+[1, 2, 3, 4, 6]
+>>> pyzhee.odd_man_out()
+[6]
+```
+
+#### `not_of_a_kind(kind)`
+
+Similar to `odd_man_out()`.  Returns a list of values that don't match a specific _kind_.  `kind` indicates what sort of kind to look for.  If the function is passed a `3` for instance, it will return all the values that are _not_ in a three of a kind.
+
+```python
+>>> pyzhee.roll_all()
+[2, 2, 2, 3, 1]
+>>> pyzhee.not_of_a_kind(3)
+[3, 1]
+```
+
+> `not_of_a_kind()` and `odd_man_out()` both return lists, even if there's only one value
