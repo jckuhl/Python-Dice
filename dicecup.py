@@ -2,8 +2,8 @@ from dice import Dice
 from dieexception import DieException
 
 dicecup_errors = {
-    "invalid_string": Exception('Invalid dice type string, should be in format XdY'),
-    "no_dice": Exception('No dice!')
+    "invalid_string": DieException('Invalid dice type string, should be in format XdY'),
+    "no_dice": DieException('No dice!')
 }
 
 class DiceCup:
@@ -31,7 +31,7 @@ class DiceCup:
         Sets all the values of the dice, mostly for debugging
         """
         if len(values) != len(self.dice):
-            raise Exception(f'Values and dice must be the same length: {len(self.dice)}')
+            raise DieException(f'Values and dice must be the same length: {len(self.dice)}')
         index = 0
         for die in self.dice:
             die.value = values[index]
@@ -56,7 +56,7 @@ class DiceCup:
         if len(self.dice) == 0:
             raise dicecup_errors["no_dice"]
         if index >= len(self.dice) or index < 0:
-            raise DieException()
+            raise DieException(f'Invalid index: {index}')
         self.values[index] = self.dice[index].roll()
         return self.values
 

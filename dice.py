@@ -1,9 +1,5 @@
 from random import randint
 
-dice_error = {
-    "type_error": TypeError("Invalid Types, must be a dice and a dice or int")
-}
-
 class Dice:
 
     """
@@ -39,7 +35,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value == other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __ne__(self, other):
         """
@@ -50,7 +46,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value != other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
     
     def __ge__(self, other):
         """
@@ -61,7 +57,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value >= other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __gt__(self, other):
         """
@@ -72,7 +68,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value > other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __le__(self, other):
         """
@@ -83,7 +79,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value <= other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __lt__(self, other):
         """
@@ -94,7 +90,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value < other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __add__(self, other):
         """
@@ -105,7 +101,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value + other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __radd__(self, other):
         """
@@ -116,7 +112,7 @@ class Dice:
         elif isinstance(other, int):
             return other + self.value
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
 
     def __sub__(self, other):
         """
@@ -127,7 +123,7 @@ class Dice:
         elif isinstance(other, int):
             return self.value - other
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')
         
     def __rsub__(self, other):
         """
@@ -138,4 +134,4 @@ class Dice:
         elif isinstance(other, int):
             return other - self.value
         else:
-            raise dice_error["type_error"]
+            raise TypeError(f'Invalid Types, must be a dice and a dice or int, recieved {type(other)}')

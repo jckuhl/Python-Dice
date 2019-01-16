@@ -66,13 +66,13 @@ class PyZhee(DiceCup):
         """
         Return the one die that doesn't fit a small straight
         """
-        if self.lg_straight or not self.sm_straight:
+        if self.lg_straight() or not self.sm_straight():
             # if there isn't a straight, or if there's a large straight, there's no odd man
             return None
         else:
             # if the value is in the middle, it has to be a duplicate
             if self.of_a_kind(2):
-                return self.find_kinds(2)[0]
+                return int(self.find_kinds(2)[0][0])
             # if the value isn't a duplicate, it's either the first or last value
             else:
                 dice = self.dice.copy()
