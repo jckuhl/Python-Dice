@@ -20,15 +20,18 @@ Please see [How to play](howtoplay.md) for more information
 
 ## dice.py
 
-> For brevity sake, I will be ignoring the `self` argument in all method calls as it is only relevant inside the class
+> For brevity sake, I will be ignoring the `self` argument in all method headers as it is only relevant inside the class
 
 ### `class Dice`
 
 Models a single die.  A die may have an number of sides.  A two sided die would essentially be a coin.  Dice have the appropriate dunders to be added, subtracted and compared.  The initializer takes a single parameter, `sides`, the number of sides
 
 ```python
-dice = Dice(6)  # six sided dice
-dice.roll()     # produces a random value 1 <= x <= 6
+>>> dice = Dice(6)  # six sided dice
+>>> dice.roll()     # produces a random value 1 <= x <= 6
+3
+>>> dice.roll()
+5
 ```
 
 > Unrolled dice have an initial value of zero
@@ -44,7 +47,7 @@ Rolls the die, returning a value between one and the number of sides, including 
 Models a dice cup, like a Yahtzee cup.  Initializer takes a string in the format of XdY to generate dice, where X is the number of dice and Y is the number of sides on a dice.  For a Yahtzee game, for example, the string is `'5d6'`.  5 for five dice and 6 for six sides per die.
 
 ```python
-dicecup = DiceCup('5d6') # create a dice cup with 5 six sided die
+>>> dicecup = DiceCup('5d6') # create a dice cup with 5 six sided die
 ```
 
 > Note that initializing the dice cup leaves all the dice unrolled with values of 0.
@@ -314,3 +317,83 @@ Similar to `odd_man_out()`.  Returns a list of values that don't match a specifi
 ```
 
 > `not_of_a_kind()` and `odd_man_out()` both return lists, even if there's only one value
+
+## scoreboard.py
+
+### class ScoreBoard
+
+A Yatzhee specific scoreboard.  One single attribute, a `__score` dictionary which is meant to only be accessed through methods on the class.  Will not allow values to be rewritten if they're already written, which is why the attribute is meant to be private.
+
+```python
+self.__score = {
+    "upper": {
+        "ones": None,
+        "twos": None,
+        "threes": None,
+        "fours": None,
+        "fives": None,
+        "sixes": None,
+    },
+    "total upper": None,
+    "lower": {
+        "three of a kind": None,
+        "four of a kind": None,
+        "full house": None,
+        "small straight": None,
+        "large straight": None,
+        "yatzhee": None,
+        "chance": None,
+        "yatzhee bonus": None,
+    },
+    "total lower": None,
+    "grand total": None
+}
+```
+
+Scoreboard is a property on the Player class.
+
+```python
+class Player:
+    
+    def __init__(self, name):
+        self.name = name
+        self.score_board = ScoreBoard()
+```
+
+#### `total_upper()`
+
+Returns the total score for the upper section, adding 35 points if the score is 63 or higher.
+
+#### `total_lower()`
+
+Returns the total score for the lower section
+
+#### `calculate_totals()`
+
+Returns the total sum of all the scores and also sets them in the `__score` dictionary
+
+#### `set_score(key, value)`
+
+Sets a score at a given key, a specific value
+
+```python
+>>> player.scoreboard.set_score('large straight', 40)
+```
+> Throws DieException if the field already has a value
+
+#### `get_keys()`
+
+Gets the scoreboard's `__score` attribute's keys, as if the dictionary was flattened (without flattening the dictionary)
+
+#### `get_grand_total()`
+
+Returns the grand total
+
+#### `get_field(field)`
+
+Returns the value at a given field, `False` if nothing is found
+
+```python
+>>> player.scoreboard.get_field('yatzhee')
+50
+```
