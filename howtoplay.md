@@ -47,6 +47,8 @@ For example if you see this:
 
 If you want to reroll the third, fourth and fifth die, just enter `345`
 
+> You don't have to enter them in order, `345` and `453` mean the same thing
+
 When you either run out of rolls in your turn or get a combination that you like, you can enter your score into the desired field.  Simply type the field exactly as you see it in the display when you're prompted.
 
 > All inputs are case insensitive

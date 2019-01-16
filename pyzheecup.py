@@ -81,3 +81,14 @@ class PyZhee(DiceCup):
                     return dice[0]
                 else:
                     return dice[4]
+
+    def not_a_kind(self, kind):
+        """
+        Returns the dice that don't match the kind
+        If kind = 3, finds the dice that aren't members of a 3 of a kind
+        """
+        kinds = self.find_kinds(kind)
+        exclude = []
+        for kind in kinds:
+            exclude.append(int(kind[0]))
+        return [die for die in self.values if die not in exclude]

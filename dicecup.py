@@ -26,6 +26,18 @@ class DiceCup:
         while len(self.dice) < dice:
             self.dice.append(Dice(sides))
 
+    def set_values(self, values):
+        """
+        Sets all the values of the dice, mostly for debugging
+        """
+        if len(values) != len(self.dice):
+            raise Exception(f'Values and dice must be the same length: {len(self.dice)}')
+        index = 0
+        for die in self.dice:
+            die.value = values[index]
+            index += 1
+        return self.dice
+
     def roll_all(self):
         """
         Rolls all the dice in the cup, raises an exception if there are no dice in the cup
@@ -59,13 +71,48 @@ class DiceCup:
             self.values[index] = self.dice[index].roll()
         return self.values
 
+    def roll_values(self, values):
+        """
+        Rolls all the dice that are in the values list given
+        """
+        include = self.get_die_indices(values)
+        for index in self.get_die_indices(self.values):
+            if index in include:
+                self.values[index] = self.dice[index].roll()
+        return self.values
+
     def roll_specific(self, number):
         """
         Rolls all the die with a specific value
         """
         for die in self.dice:
-            if die.value == number:
-                die.roll()
+            if die == number:
+                value = die.value
+                roll = die.roll()
+                index = self.values.index(value)
+                self.values[index] = roll
+        return self.values
+
+    def roll_except(self, number):
+        """
+        Rolls all except the given number
+        """
+        for die in self.dice:
+            if die != number:
+                value = die.value
+                roll = die.roll()
+                index = self.values.index(value)
+                self.values[index] = roll
+        return self.values
+
+    def roll_except_all(self, values):
+        """
+        Rolls all except the given list of dice
+        """
+        exclude = self.get_die_indices(values)
+        for index in self.get_die_indices(self.values):
+            if index not in exclude:
+                self.values[index] = self.dice[index].roll()
         return self.values
 
     def sum(self):
@@ -107,7 +154,7 @@ class DiceCup:
 
     def sort(self, reverse=True):
         """
-        sorts the dice, ascending if bool reverse is True
+        Sorts the dice, ascending if bool reverse is True
         """
         self.dice.sort(reverse=reverse)
         return self.dice

@@ -1,4 +1,5 @@
 import sys
+import time
 from functools import partial
 from dieexception import DieException
 from operator import itemgetter
@@ -213,7 +214,7 @@ def ai_loop(player):
         '6': 'sixes'
     }
     print(f'It is {player.name}\'s turn!')
-    rolls = roll_die(pyzhee.roll_all, player.name)
+    roll_die(pyzhee.roll_all, player.name)
     remaining_rolls = 2
     while True:
         print(f'{player.name} has {remaining_rolls} rolls remaining.')
@@ -233,12 +234,18 @@ def ai_loop(player):
             else:
                 score =player.score_board.set_score('yatzhee bonus', yatzhee_bonus + 100)
                 print(score_string(player, score, 'yatzhee bonus'))
+            break
         
         # Four of a Kind
         elif pyzhee.of_a_kind(4) and field_is_blank('four of a kind'):
-            score = player.score_board.set_score('four of a kind', pyzhee.sum())
-            print(score_string(player, score, 'four of a kind'))
-            break
+            if field_is_blank('yatzhee') and remaining_rolls > 0:
+                odd_man = pyzhee.not_a_kind(4)[0]
+                pyzhee.roll_single(odd_man)
+                remaining_rolls -= 1
+            else:
+                score = player.score_board.set_score('four of a kind', pyzhee.sum())
+                print(score_string(player, score, 'four of a kind'))
+                break
 
         # Full House
         elif pyzhee.full_house() and field_is_blank('full house'):
@@ -253,9 +260,14 @@ def ai_loop(player):
 
         # Three Of A Kind
         elif pyzhee.of_a_kind(3) and field_is_blank('three of a kind'):
-            score = player.score_board.set_score('three of a kind', pyzhee.sum())
-            print(score_string(player, score, 'three of a kind'))
-            break
+            if remaining_rolls > 0 and (field_is_blank('yatzhee') or field_is_blank('four of a kind') or field_is_blank('full house')):
+                odd_men = pyzhee.not_a_kind(3)
+                pyzhee.roll_values(odd_men)
+                remaining_rolls -= 1
+            else:
+                score = player.score_board.set_score('three of a kind', pyzhee.sum())
+                print(score_string(player, score, 'three of a kind'))
+                break
 
         # Large Straight
         elif pyzhee.lg_straight() and field_is_blank('large straight'):
@@ -274,9 +286,26 @@ def ai_loop(player):
                     print(score_string(player, score, 'small straight'))
                 break
             else:
+                print(f'{player.name} is thinking . . .')
+                time.sleep(1)
                 odd_man = pyzhee.odd_man_out()
                 index = pyzhee.get_die_index(odd_man)
-                rolls = pyzhee.roll_single(index)
+                pyzhee.roll_single(index)
+                remaining_rolls -= 1
+        elif pyzhee.of_a_kind(2) and remaining_rolls > 0:
+            pairs = pyzhee.find_kinds(2)    #[(value, number_of_occurances)]
+            # if there are two pairs try for something better
+            if len(pairs) == 2:
+                odd_man = pyzhee.not_a_kind(2)[0]
+                index = pyzhee.get_die_index(odd_man)
+                pyzhee.roll_single(index)
+                remaining_rolls -= 1
+            # if there's one pair, and it's higher than 3
+            elif pairs[0][0] > 3:
+                pyzhee.roll_except(pairs[0][0])
+                remaining_rolls -= 1
+            else:
+                pyzhee.roll_all()
                 remaining_rolls -= 1
         # Chance and the upper part of the scoreboard
         else:
