@@ -1,8 +1,6 @@
-from scoreboard import ScoreBoard
-
 class Player:
     
-    def __init__(self, name):
+    def __init__(self, name, scoreboard):
         self.name = name
-        self.score_board = ScoreBoard()
+        self.score_board = scoreboard()
         
