@@ -4,6 +4,7 @@ from functools import partial
 from dieexception import DieException
 from operator import itemgetter
 from pyzheecup import PyZhee
+from max_object import get_max
 
 responses = {
     'yes': [
@@ -205,14 +206,6 @@ def ai_loop(player):
     def field_is_blank(field):
         """ Determine if a field is blank or not """
         return player.score_board.get_field(field) is None
-    upper = {
-        '1': 'ones',
-        '2': 'twos',
-        '3': 'threes',
-        '4': 'fours',
-        '5': 'fives',
-        '6': 'sixes'
-    }
     print(f'It is {player.name}\'s turn!')
     roll_die(pyzhee.roll_all, player.name)
     remaining_rolls = 2
@@ -310,17 +303,38 @@ def ai_loop(player):
         # Chance and the upper part of the scoreboard
         else:
             if remaining_rolls == 0:
-                if field_is_blank('chance'):
-                    chance = pyzhee.sum()
-                    upper_scores = [pyzhee.count_numbers(value) * value for value in upper.values()]
-                    use_chance = True
-                    for value in upper_scores:
-                        if chance < value:
-                            use_chance = False
-                    if use_chance:
-                        score = player.score_board.set_score('chance', chance)
+                number = {
+                    'ones': 1,
+                    'twos': 2,
+                    'threes': 3,
+                    'fours': 4,
+                    'fives': 5,
+                    'sixes': 6
+                }
+                upper = player.score_board.get_field('upper')
+                empty_upper = {}
+                # populate empty_upper with the scores player will recieve if she plays there
+                for field in upper:
+                    if field_is_blank(field):
+                        n = number[field]
+                        empty_upper[field] = n * pyzhee.count_numbers(n)
+                # determine whethere to play in chance or upper
+                if len(empty_upper.items) > 0:
+                    highest_upper = get_max(empty_upper)
+                    key, value = list(highest_upper.items())[0]
+                    if field_is_blank('chance'):
+                        if value > pyzhee.sum():
+                            player.score_board.set_score(key, value)
+                        else:
+                            player.score_board.set_score('chance', pyzhee.sum())
                     else:
-                        pass
+                        player.score_board.set_score(key, value)
+                # if upper is full, check and play chance
+                elif field_is_blank('chance'):
+                    player.score_board.set_score('chance', pyzhee.sum())
+                # else pick a box to fill out
+                else:
+                    pass
                 break
 
     player.score_board.calculate_totals()
