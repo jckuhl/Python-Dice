@@ -31,7 +31,7 @@ responses = {
 def score_string(player, score, field):
     """
     Creates a string that labels how a player scored.
-    Example:  Bob scored 50 using Yatzhee
+    Example:  Bob scored 50 using PyZhee
     """
     return f'{player.name} scored {score} using {field.title()}'
 
@@ -64,23 +64,23 @@ def of_a_kind(player, value):
     elif value == 4:
         score = score_kind('four of a kind', 4)
     elif value == 5:
-        if player.score_board.get_field('yatzhee') == None:
+        if player.score_board.get_field('pyzhee') == None:
             if pyzhee.of_a_kind(5):
-                score = player.score_board.set_score('yatzhee', 50)
+                score = player.score_board.set_score('pyzhee', 50)
                 print('PYZHEE!')
-                print(score_string(player, score, 'yatzhee'))
+                print(score_string(player, score, 'pyzhee'))
             else:
-                score = player.score_board.set_score('yatzhee', 0)
-                print('You\'ve lost your Yatzhee slot')
+                score = player.score_board.set_score('pyzhee', 0)
+                print('You\'ve lost your PyZhee slot')
                 print('WOMP womp wooooomp')
-        elif player.score_board.get_field('yatzhee') == 50:
+        elif player.score_board.get_field('pyzhee') == 50:
             # if the value is zero, the player filled it in with junk
-            yahtzee_bonus = player.score_board.get_field('yatzhee bonus')
+            yahtzee_bonus = player.score_board.get_field('pyzhee bonus')
             if yahtzee_bonus == None:
-                score = player.set_score('yatzhee bonus', 100)
+                score = player.set_score('pyzhee bonus', 100)
             else:
-                score = player.set_score('yatzhee bonus', 100 + yahtzee_bonus)
-            print(score_string(player, score, 'yatzhee bonus'))
+                score = player.set_score('pyzhee bonus', 100 + yahtzee_bonus)
+            print(score_string(player, score, 'pyzhee bonus'))
 
 def find_straight(player, size):
     """
@@ -122,8 +122,8 @@ def calc_score(player, response):
     """
     Determines the appropriate function to run given the player's response
     """
-    if response == 'yatzhee bonus':
-        print('You may only use that field if you\'ve already got a yatzhee and only for further yatzhees')
+    if response == 'pyzhee bonus':
+        print('You may only use that field if you\'ve already got a pyzhee and only for further pyzhees')
         return False
     scoreboard = {
         'ones': partial(set_score, player, 'ones'),
@@ -137,7 +137,7 @@ def calc_score(player, response):
         'full house': partial(score_full_house, player),
         'small straight': partial(find_straight, player, 's'),
         'large straight': partial(find_straight, player, 'l'),
-        'yatzhee': partial(of_a_kind, player, 5),
+        'pyzhee': partial(of_a_kind, player, 5),
         'chance': partial(chance, player)
     }
     if response not in scoreboard:
@@ -192,7 +192,7 @@ def roll_die(roll_fn, player_name):
     print(f'{player_name} rolls: {pyzhee.values}')
     return rolls
 
-def ai_chose_field(player):
+def get_available_fields(player):
     available = player.score_board.get_all_empty_fields()
     # calculate all the possible scores and do the one on the top
     scoreboard = {
@@ -207,17 +207,68 @@ def ai_chose_field(player):
         'full house': lambda: 25 if pyzhee.full_house() else 0,
         'small straight': lambda: 30 if pyzhee.sm_straight() else 0,
         'large straight': lambda: 40 if pyzhee.lg_straight() else 0,
-        'yatzhee': lambda: 50 if pyzhee.of_a_kind(5) else 0,
         'chance': lambda: pyzhee.sum()
     }
     for key in available.keys():
         available[key] = scoreboard[key]()
+    return available
+
+def ai_chose_field(player):
+    """
+    AI choses a field to put their score into
+    """
+    if pyzhee.of_a_kind(5):
+        # If PyZhee, either score in pyzhee or pyzhee bonus, then skip the rest of this function
+        score = 0
+        field = ''
+        if player.score_board.field_is_blank('pyzhee'):
+            score = player.score_board.set_score('pyzhee', 50)
+            field = 'pyzhee'
+        else:
+            score = player.score_board.get_field('pyzhee bonus')
+            score = score if score is not None else 0
+            score = player.score_board.set_score('pyzhee bonus', score + 100)
+            field = 'pyzhee bonus'
+        print('PYZHEE!')
+        print(score_string(player, score, field))
+        return
+    available = get_available_fields(player)
     key, value = get_max(available)
     if value == 0:
-        pass
+        sacrifice = {}
+        for n in scoreboard_dict.number:
+            if n in available:
+                value = scoreboard_dict.number[n]
+                sacrifice.update({ n: value})
+        for n in scoreboard_dict.lower_no_chance:
+            if n in available:
+                value = scoreboard_dict.number[n]
+                sacrifice.update({ n: pyzhee.sum() if value == 'sum' else value })
+        key, value = get_min(sacrifice)
+        if key == 'pyzhee':
+            print('You\'ve lost your PyZhee slot')
+            print('WOMP womp wooooomp')
+        player.score_board.set_score(key, 0)
+        print(score_string(player, 0, key))
     else:
         player.score_board.set_score(key, value)
         print(score_string(player, value, key))
+
+def ai_chose_action(player):
+    """
+    Returns the indices of dice the player wants to reroll, if any
+    'all' if the player wants to reroll all, 
+    'score' if the player wants to score
+    [indices] if the player wants to reroll some
+    """
+    # Handle pyzhee immediately so any set up can be skipped if there is one
+    if pyzhee.of_a_kind(5):
+        return 'score'
+
+    available = get_available_fields(player)
+    if pyzhee.lg_straight() and 'large straight' in available:
+        return 'score'
+    return 0
 
 def ai_loop(player):
     """
@@ -231,6 +282,17 @@ def ai_loop(player):
         print(f'{player.name} has {remaining_rolls} rolls remaining.')
         if remaining_rolls == 0:
             ai_chose_field(player)
+            break
+        else:
+            dice = ai_chose_action(player)
+            if dice == 'score':
+                ai_chose_field(player)
+                break
+            elif dice == 'all':
+                roll_die(pyzhee.roll_all, player.name)
+            else:
+                roll_die(partial(pyzhee.roll_set, dice), player.name)
+            remaining_rolls -= 1
 
     player.score_board.calculate_totals()
     player.score_board.view_scores()

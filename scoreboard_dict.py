@@ -10,7 +10,7 @@ number = {
 lower_no_chance = {
     'three of a kind': 'sum',
     'four of a kind': 'sum',
-    'yatzhee': 50,
+    'pyzhee': 50,
     'small straight': 30,
     'large straight': 40,
     'full house': 25

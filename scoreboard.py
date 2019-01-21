@@ -24,9 +24,9 @@ class ScoreBoard:
                 "full house": None,
                 "small straight": None,
                 "large straight": None,
-                "yatzhee": None,
+                "pyzhee": None,
                 "chance": None,
-                "yatzhee bonus": None,
+                "pyzhee bonus": None,
             },
             "total lower": None,
             "grand total": None
@@ -73,7 +73,7 @@ class ScoreBoard:
         Sums the lower section, adding 100 * the number of yahtzee bonuses, if there are any
         """
         subtotal = self.__add_section('lower')
-        if not self.__field_is_blank('lower', 'yatzhee bonus'):
+        if not self.__field_is_blank('lower', 'pyzhee bonus'):
             subtotal += 100 * self.__score['lower']['yahtzee bonus']
         return subtotal
 
@@ -142,7 +142,7 @@ class ScoreBoard:
     def get_all_empty_fields(self):
         """ Get a dictionary of empty fields """
         empty = {}
-        exclude = ['total upper', 'total lower', 'yatzhee bonus', 'grand total']
+        exclude = ['total upper', 'total lower', 'pyzhee bonus', 'grand total']
         for key in self.get_keys():
             if self.field_is_blank(key) and key not in exclude:
                 value = self.get_field(key)
