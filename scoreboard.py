@@ -139,6 +139,16 @@ class ScoreBoard:
         """ Determine if a field is blank or not """
         return self.get_field(field) is None
 
+    def get_all_empty_fields(self):
+        """ Get a dictionary of empty fields """
+        empty = {}
+        exclude = ['total upper', 'total lower', 'yatzhee bonus', 'grand total']
+        for key in self.get_keys():
+            if self.field_is_blank(key) and key not in exclude:
+                value = self.get_field(key)
+                empty.update({ key: value })
+        return empty
+
     def calc_possible_upper_scores(self, pyzhee):
         """
         Returns the possible scores the player can get with the current dice.

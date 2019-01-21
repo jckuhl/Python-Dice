@@ -192,6 +192,33 @@ def roll_die(roll_fn, player_name):
     print(f'{player_name} rolls: {pyzhee.values}')
     return rolls
 
+def ai_chose_field(player):
+    available = player.score_board.get_all_empty_fields()
+    # calculate all the possible scores and do the one on the top
+    scoreboard = {
+        'ones': lambda: pyzhee.count_numbers(1),
+        'twos': lambda: pyzhee.count_numbers(2) * 2,
+        'threes': lambda: pyzhee.count_numbers(3) * 3,
+        'fours': lambda: pyzhee.count_numbers(4) * 4,
+        'fives': lambda: pyzhee.count_numbers(5) * 5,
+        'sixes': lambda: pyzhee.count_numbers(6) * 6,
+        'three of a kind': lambda: pyzhee.sum() if pyzhee.of_a_kind(3) else 0,
+        'four of a kind': lambda: pyzhee.sum() if pyzhee.of_a_kind(4) else 0,
+        'full house': lambda: 25 if pyzhee.full_house() else 0,
+        'small straight': lambda: 30 if pyzhee.sm_straight() else 0,
+        'large straight': lambda: 40 if pyzhee.lg_straight() else 0,
+        'yatzhee': lambda: 50 if pyzhee.of_a_kind(5) else 0,
+        'chance': lambda: pyzhee.sum()
+    }
+    for key in available.keys():
+        available[key] = scoreboard[key]()
+    key, value = get_max(available)
+    if value == 0:
+        pass
+    else:
+        player.score_board.set_score(key, value)
+        print(score_string(player, value, key))
+
 def ai_loop(player):
     """
     Decision tree and loop for the ai
@@ -202,139 +229,8 @@ def ai_loop(player):
     remaining_rolls = 2
     while True:
         print(f'{player.name} has {remaining_rolls} rolls remaining.')
-        # Yatzhee
-        if pyzhee.of_a_kind(5) and player.score_board.field_is_blank('yatzhee'):
-            score = player.score_board.set_score('yatzhee', 50)
-            print('PYZHEE!')
-            print(score_string(player, score, 'yatzhee'))
-            break
-
-        # Yatzhee Bonus
-        elif pyzhee.of_a_kind(5) and not player.score_board.field_is_blank('yatzhee'):
-            yatzhee_bonus = player.score_board.get_field('yatzhee bonus')
-            if yatzhee_bonus == None:
-                score = player.score_board.set_score('yatzhee bonus', 100)
-                print(score_string(player, score, 'yatzhee bonus'))
-            else:
-                score =player.score_board.set_score('yatzhee bonus', yatzhee_bonus + 100)
-                print(score_string(player, score, 'yatzhee bonus'))
-            break
-        
-        # Four of a Kind
-        elif pyzhee.of_a_kind(4) and player.score_board.field_is_blank('four of a kind'):
-            if player.score_board.field_is_blank('yatzhee') and remaining_rolls > 0:
-                odd_man = pyzhee.not_a_kind(4)[0]
-                roll_die(partial(pyzhee.roll_single, odd_man), player.name)
-                remaining_rolls -= 1
-            else:
-                score = player.score_board.set_score('four of a kind', pyzhee.sum())
-                print(score_string(player, score, 'four of a kind'))
-                break
-
-        # Full House
-        elif pyzhee.full_house() and player.score_board.field_is_blank('full house'):
-            # sometimes 3 of a kind is worth more than FH
-            if pyzhee.sum() > 25 and player.score_board.field_is_blank('three of a kind'):
-                score = player.score_board.set_score('three of a kind', pyzhee.sum())
-                print(score_string(player, score, 'three of a kind'))
-            else:
-                score = player.score_board.set_score('full house', 25)
-                print(score_string(player, score, 'full house'))
-            break
-
-        # Three Of A Kind
-        elif pyzhee.of_a_kind(3) and player.score_board.field_is_blank('three of a kind'):
-            if remaining_rolls > 0 and (player.score_board.field_is_blank('yatzhee') or player.score_board.field_is_blank('four of a kind') or player.score_board.field_is_blank('full house')):
-                odd_men = pyzhee.not_a_kind(3)
-                roll_die(partial(pyzhee.roll_values, odd_men), player.name)
-                remaining_rolls -= 1
-            else:
-                score = player.score_board.set_score('three of a kind', pyzhee.sum())
-                print(score_string(player, score, 'three of a kind'))
-                break
-
-        # Large Straight
-        elif pyzhee.lg_straight() and player.score_board.field_is_blank('large straight'):
-            score = player.score_board.set_score('large straight', 40)
-            print(score_string(player, score, 'large straight'))
-            break
-
-        # Small Straight
-        elif pyzhee.sm_straight() and player.score_board.field_is_blank('small straight'):
-            if remaining_rolls == 0:
-                if pyzhee.sum() > 30 and not player.score_board.field_is_blank('chance'):
-                    score = player.score_board.set_score('chance', pyzhee.sum())
-                    print(score_string(player, score, 'chance'))
-                else:
-                    score = player.score_board.set_score('small straight', 30)
-                    print(score_string(player, score, 'small straight'))
-                break
-            else:
-                print(f'{player.name} is thinking . . .')
-                time.sleep(1)
-                odd_man = pyzhee.odd_man_out()
-                index = pyzhee.get_die_index(odd_man)
-                roll_die(partial(pyzhee.roll_single, index), player.name)
-                remaining_rolls -= 1
-        elif pyzhee.of_a_kind(2) and remaining_rolls > 0:
-            pairs = pyzhee.find_kinds(2)    #[(value, number_of_occurances)]
-            # if there are two pairs try for something better
-            #
-            if len(pairs) == 2 and not pyzhee.full_house():
-                odd_man = pyzhee.not_a_kind(2)[0]
-                index = pyzhee.get_die_index(odd_man)
-                roll_die(partial(pyzhee.roll_single, index), player.name)
-                remaining_rolls -= 1
-            # if there's one pair, and it's higher than 3
-            elif int(pairs[0][0]) > 3 and not pyzhee.full_house():
-                these = int(pairs[0][0])
-                roll_die(partial(pyzhee.roll_except, these), player.name)
-                remaining_rolls -= 1
-            # if there is an unplayable full house . . ., we can't do of a kind either if the code got down here
-            elif pyzhee.full_house():
-                pair, threekind = pyzhee.get_full_house_matches()
-                threekey = scoreboard_dict.get_key_from_number(threekind)
-                twokey = scoreboard_dict.get_key_from_number(pair)
-                if player.score_board.field_is_blank(threekey):
-                    roll_die(partial(pyzhee.roll_except, threekind), player.name)
-                    remaining_rolls -= 1
-                elif player.score_board.field_is_blank(twokey):
-                    roll_die(partial(pyzhee.roll_except, pair), player.name)
-                    remaining_rolls -= 1
-                else:
-                    roll_die(pyzhee.roll_all, player.name)
-                    remaining_rolls -= 1
-            else:
-                roll_die(pyzhee.roll_all, player.name)
-                remaining_rolls -= 1
-        # Chance and the upper part of the scoreboard
-        else:
-            if remaining_rolls == 0:
-                empty_upper = player.score_board.calc_possible_upper_scores(pyzhee)
-                # determine whethere to play in chance or upper
-                if len(empty_upper.items()) > 0:
-                    highest_upper = get_max(empty_upper)
-                    field, value = list(highest_upper.items())[0]
-                    if player.score_board.field_is_blank('chance'):
-                        if value > pyzhee.sum():
-                            score = player.score_board.set_score(field, value)
-                            print(score_string(player, score, field))
-                        else:
-                            score =player.score_board.set_score('chance', pyzhee.sum())
-                            print(score_string(player, score, 'chance'))
-                    else:
-                        score = player.score_board.set_score(field, value)
-                        print(score_string(player, score, field))
-                # if upper is full, check and play chance
-                elif player.score_board.field_is_blank('chance'):
-                    score = player.score_board.set_score('chance', pyzhee.sum())
-                    print(score_string(player, score, 'chance'))
-                # else pick a box to fill out
-                else:
-                    field = player.score_board.get_min_max_lower(pyzhee, min_val=True)
-                    player.score_board.set_score(field, 0)
-                    print(score_string(player, 0, field))
-                break
+        if remaining_rolls == 0:
+            ai_chose_field(player)
 
     player.score_board.calculate_totals()
     player.score_board.view_scores()
