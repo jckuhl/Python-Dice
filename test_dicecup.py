@@ -1,9 +1,16 @@
-from dicecup import DiceCup
 import unittest
+
+from dicecup import DiceCup
+from random import Random
 
 class TestDiceCup(unittest.TestCase):
 
     dicecup = DiceCup('5d6')
+
+    def setUp(self):
+        global random
+        random = Random(123)
+
     def test_dicecup_init(self):
         """ A 5d6 should make five six sided dice """
         self.assertEqual(len(self.dicecup.dice), 5)
@@ -23,4 +30,6 @@ class TestDiceCup(unittest.TestCase):
         self.assertEqual(len(self.dicecup.values), 5)
     
     def test_set_dice(self):
-        pass
+        self.dicecup.set_values([1,2,3,4,5])
+        self.assertListEqual(self.dicecup.set_values, [1,2,3,4,5])
+    

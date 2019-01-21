@@ -1,4 +1,6 @@
+import scoreboard_dict
 from dieexception import DieException
+from dict_util import get_max, get_min
 
 class ScoreBoard:
 
@@ -132,3 +134,31 @@ class ScoreBoard:
             return self.__score[field]
         else:
             return False
+
+    def field_is_blank(self, field):
+        """ Determine if a field is blank or not """
+        return self.get_field(field) is None
+
+    def calc_possible_upper_scores(self, pyzhee):
+        """
+        Returns the possible scores the player can get with the current dice.
+        PyZhee is a pyzhee object with a count_numbers method
+        """
+        upper = self.get_field('upper')
+        empty_upper = {}
+        # populate empty_upper with the scores player will recieve if she plays there
+        for field in upper:
+            if self.field_is_blank(field):
+                n = scoreboard_dict.number[field]
+                empty_upper[field] = n * pyzhee.count_numbers(n)
+        return empty_upper
+
+    def get_min_max_lower(self, pyzhee, min_val=True):
+        lower = self.get_field('lower')
+        empty_lower = {}
+        for field in lower:
+            if self.field_is_blank(field):
+                value = scoreboard_dict.lower_no_chance[field]
+                value = pyzhee.sum() if value == 'sum' else value
+                empty_lower.update({field: value})
+        return get_min(empty_lower) if min_val else get_max(empty_lower)

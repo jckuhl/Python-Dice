@@ -37,6 +37,16 @@ class PyZhee(DiceCup):
                         return True
         return False
 
+    def get_full_house_matches(self):
+        pair = 0
+        threekind = 0
+        for k, v in self.count().items():
+            if v == 3:
+                threekind = k
+            if v == 2:
+                pair = k
+        return (int(pair), int(threekind))
+
     def straight(self):
         """
         Finds the length of a straight
